@@ -1,0 +1,80 @@
+{
+  "navbar": {
+    "home": "Startseite",
+    "cars": "Alle Autos",
+    "dashboard": "Dashboard",
+    "language": "Sprache",
+    "login": "Login / Registrierung",
+    "profile": "Profil",
+    "settings": "Einstellungen",
+    "logout": "Abmelden",
+    "light": "Heller Modus",
+    "dark": "Dunkler Modus"
+  },
+  "home": {
+    "availableCars": "Verfügbare Fahrzeuge",
+    "loading": "Lade Fahrzeuge...",
+    "noCars": "Keine Fahrzeuge verfügbar.",
+    "error": "❌ Fehler beim Laden der Fahrzeuge."
+  },
+  "cars": {
+    "title": "Alle Fahrzeuge",
+    "loading": "Fahrzeuge werden geladen...",
+    "noResults": "Keine Fahrzeuge verfügbar"
+
+  },
+  "filter": {
+    "search": "Suche",
+    "searchPlaceholder": "Suche nach Stichwort, Marke, Modell...",
+    "make": "Marke",
+    "model": "Modell",
+    "price": "Preis (€)",
+    "year": "Baujahr",
+    "fuelType": "Kraftstoffart",
+    "transmission": "Getriebe",
+    "driveType": "Antriebsart",
+    "emissionClass": "Abgasnorm",
+    "color": "Farbe",
+    "interior": "Innenausstattung",
+    "maxMileage": "Max. Kilometerstand (km)",
+    "clear": "Filter löschen"
+  },
+   "myListings": {
+    "title": "Meine Fahrzeuginserate",
+    "loading": "⏳ Lade deine Fahrzeuge...",
+    "loginRequired": "⚠️ Bitte einloggen, um deine Fahrzeuge zu sehen.",
+    "loadError": "❌ Fahrzeuge konnten nicht geladen werden.",
+    "empty": "Du hast noch keine Fahrzeuge eingetragen.",
+    "year": "Baujahr",
+    "price": "Preis",
+    "viewDetails": "Details ansehen"
+  },
+  "carDetails": {
+    "loading": "Fahrzeugdetails werden geladen...",
+    "notFound": "Fahrzeug nicht gefunden.",
+    "loadError": "❌ Fahrzeugdetails konnten nicht geladen werden.",
+    "unknownLocation": "Unbekannter Standort",
+    "specsTitle": "Technische Daten",
+    "mileage": "Kilometerstand (km)",
+    "engineSize": "Motorgröße (L)",
+    "powerKW": "Leistung (kW)",
+    "powerHP": "Leistung (PS)",
+    "driveType": "Antriebsart",
+    "fuelType": "Kraftstoffart",
+    "consumption": "Verbrauch (L/100km)",
+    "co2": "CO2-Ausstoß (g/km)",
+    "seats": "Sitze",
+    "doors": "Türen",
+    "transmission": "Getriebe",
+    "emissionClass": "Abgasnorm",
+    "firstRegistration": "Erstzulassung",
+    "climateControl": "Klimaanlage",
+    "color": "Farbe",
+    "interior": "Innenausstattung",
+    "trailerWeightBraked": "Anhängelast gebremst (kg)",
+    "trailerWeightUnbraked": "Anhängelast ungebremst (kg)",
+    "weight": "Gewicht (kg)",
+    "cylinders": "Zylinder",
+    "tankSize": "Tankgröße (L)"
+  }
+}

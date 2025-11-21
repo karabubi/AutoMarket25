@@ -1,0 +1,31 @@
+//Users/salehalkarabubi/works/project/AutoMarket25/client/src/components/AuthPage.jsx
+import React from 'react';
+import Login from '../pages/Login';
+import Register from '../pages/Register';
+
+function AuthPage() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 to-purple-200 dark:from-gray-900 dark:to-gray-800 flex flex-col items-center justify-start px-4 pt-24 transition-colors duration-500">
+      <div className="w-full max-w-6xl rounded-3xl border border-white/30 dark:border-white/10 bg-white/30 dark:bg-white/5 backdrop-blur-lg shadow-2xl grid grid-cols-1 md:grid-cols-2 gap-6 p-6 md:p-10 transition-all duration-500">
+        
+        {/* Login Section */}
+        <div className="flex flex-col justify-center border-b md:border-b-0 md:border-r border-white/30 dark:border-white/10 pr-0 md:pr-6 transition-all">
+          <h2 className="text-3xl font-semibold text-gray-800 dark:text-white mb-6 text-center md:text-left">
+            Login
+          </h2>
+          <Login embedded />
+        </div>
+
+        {/* Register Section */}
+        <div className="flex flex-col justify-center pl-0 md:pl-6 transition-all">
+          <h2 className="text-3xl font-semibold text-gray-800 dark:text-white mb-6 text-center md:text-left">
+            Register
+          </h2>
+          <Register />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default AuthPage;

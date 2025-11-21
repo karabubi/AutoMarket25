@@ -1,0 +1,83 @@
+2025-05-02T22:31:45.390Z [error]: Query failed
+2025-05-02T22:32:10.929Z [error]: Query failed
+2025-05-02T22:32:33.168Z [error]: Query failed
+2025-05-04T21:31:19.440Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-04T21:31:19.441Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-04T21:31:19.452Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-04T21:31:19.452Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-04T23:29:22.029Z [[31merror[39m] - POST /api/cars/upload 500 - Image file format webp not allowed
+2025-05-04T23:29:22.030Z [[31merror[39m] - POST /api/cars/upload 500 - Image file format webp not allowed
+2025-05-04T23:29:30.388Z [[31merror[39m] - POST /api/cars/upload 500 - Image file format webp not allowed
+2025-05-04T23:29:30.388Z [[31merror[39m] - POST /api/cars/upload 500 - Image file format webp not allowed
+2025-05-04T23:29:52.309Z [[31merror[39m] - POST /api/cars/upload 500 - Image file format webp not allowed
+2025-05-04T23:29:52.309Z [[31merror[39m] - POST /api/cars/upload 500 - Image file format webp not allowed
+2025-05-04T23:33:22.965Z [[31merror[39m] - POST /api/cars/upload 500 - Image file format webp not allowed
+2025-05-04T23:33:22.965Z [[31merror[39m] - POST /api/cars/upload 500 - Image file format webp not allowed
+2025-05-04T23:33:45.178Z [[31merror[39m] - POST /api/cars/upload 500 - Image file format webp not allowed
+2025-05-04T23:33:45.179Z [[31merror[39m] - POST /api/cars/upload 500 - Image file format webp not allowed
+2025-05-04T23:39:08.013Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-04T23:39:08.013Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-04T23:39:08.020Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-04T23:39:08.020Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:25:16.013Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:25:16.014Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:25:16.027Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:25:16.027Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:25:22.642Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:25:22.643Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:25:22.653Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:25:22.653Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:26:42.779Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:26:42.779Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:26:42.790Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:26:42.790Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:26:50.660Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:26:50.661Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:26:50.668Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:26:50.668Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:28:02.439Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:28:02.439Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:28:02.461Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:28:02.461Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:29:30.779Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:29:30.779Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:29:30.790Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:29:30.790Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:29:35.049Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:29:35.049Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:29:35.059Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:29:35.060Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:59:08.596Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:59:08.596Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:59:08.607Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:59:08.608Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:59:16.908Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:59:16.909Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:59:16.919Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:59:16.920Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:59:28.298Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:59:28.299Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:59:28.306Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:59:28.306Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:59:36.367Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:59:36.368Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:59:36.376Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T07:59:36.376Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T08:09:20.464Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T08:09:20.464Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T08:09:20.472Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T08:09:20.472Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T08:17:02.743Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T08:17:02.744Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T08:17:02.754Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T08:17:02.755Z [[31merror[39m] - GET /api/cars/my 500 - invalid input syntax for type integer: "my"
+2025-05-05T11:03:30.676Z [[31merror[39m] - POST /api/cars/upload 500 - Image file format webp not allowed
+2025-05-05T11:03:30.676Z [[31merror[39m] - POST /api/cars/upload 500 - Image file format webp not allowed
+2025-05-05T11:05:08.418Z [[31merror[39m] - POST /api/cars/upload 500 - Image file format webp not allowed
+2025-05-05T11:05:08.419Z [[31merror[39m] - POST /api/cars/upload 500 - Image file format webp not allowed
+2025-05-05T11:07:43.294Z [[31merror[39m] - POST /api/cars/upload 500 - Image file format webp not allowed
+2025-05-05T11:07:43.295Z [[31merror[39m] - POST /api/cars/upload 500 - Image file format webp not allowed
+2025-05-05T11:07:50.804Z [[31merror[39m] - POST /api/cars/upload 500 - Image file format webp not allowed
+2025-05-05T11:07:50.805Z [[31merror[39m] - POST /api/cars/upload 500 - Image file format webp not allowed
+2025-05-05T11:09:13.001Z [[31merror[39m] - POST /api/cars/upload 500 - Image file format webp not allowed
+2025-05-05T11:09:13.002Z [[31merror[39m] - POST /api/cars/upload 500 - Image file format webp not allowed

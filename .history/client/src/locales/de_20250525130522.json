@@ -1,0 +1,25 @@
+{
+  "navbar": {
+    "home": "Startseite",
+    "cars": "Alle Autos",
+    "dashboard": "Dashboard",
+    "language": "Sprache",
+    "login": "Login / Registrierung",
+    "profile": "Profil",
+    "settings": "Einstellungen",
+    "logout": "Abmelden",
+    "light": "Heller Modus",
+    "dark": "Dunkler Modus"
+  },
+  "home": {
+    "availableCars": "Available Cars",
+    "loading": "Loading cars...",
+    "noCars": "No cars available.",
+    "error": "❌ Failed to load cars."
+  },
+  "cars": {
+    "title": "Unsere Autos",
+    "count": "{{count}} Auto verfügbar",
+    "count_plural": "{{count}} Autos verfügbar"
+  }
+}

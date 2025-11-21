@@ -1,0 +1,26 @@
+{
+  "navbar": {
+    "home": "Home",
+    "cars": "All Cars",
+    "dashboard": "Dashboard",
+    "language": "Language",
+    "login": "Login / Register",
+    "profile": "Profile",
+    "settings": "Settings",
+    "logout": "Logout",
+    "light": "Light Mode",
+    "dark": "Dark Mode"
+  },
+  
+  "home": {
+    "availableCars": "Available Cars",
+    "loading": "Loading cars...",
+    "noCars": "No cars available.",
+    "error": "❌ Failed to load cars."
+  },
+  "cars": {
+    "title": "Our Cars",
+    "count": "{{count}} car available",
+    "count_plural": "{{count}} cars available"
+  },
+}

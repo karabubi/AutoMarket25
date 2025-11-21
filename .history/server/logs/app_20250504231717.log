@@ -1,0 +1,8 @@
+2025-05-04T21:06:44.782Z [INFO] - ✅ Server running on port 5001
+2025-05-04T21:06:44.792Z [INFO] - ✅ Connected to PostgreSQL database
+2025-05-04T21:06:56.100Z [INFO] - ✅ Server running on port 5001
+2025-05-04T21:06:56.109Z [INFO] - ✅ Connected to PostgreSQL database
+2025-05-04T21:10:04.651Z [INFO] - OPTIONS /api/auth/login 204 0 - 2.618 ms
+2025-05-04T21:10:04.761Z [INFO] - POST /api/auth/login 200 340 - 108.653 ms
+2025-05-04T21:17:18.367Z [INFO] - ✅ Server running on port 5001
+2025-05-04T21:17:18.393Z [INFO] - ✅ Connected to PostgreSQL database

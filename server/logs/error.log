@@ -1,0 +1,5 @@
+2025-05-20T14:23:45.690Z [[31merror[39m] - ❌ Unhandled Rejection:
+2025-05-25T14:41:09.524Z [[31merror[39m] - ❌ PostgreSQL connection failed: db.query is not a function
+2025-08-04T21:40:40.529Z [[31merror[39m] - ❌ Unhandled Rejection: Image file format avif not allowed
+2025-08-04T21:48:59.694Z [[31merror[39m] - ❌ Unhandled Rejection: Image file format avif not allowed
+2025-08-04T21:58:33.776Z [[31merror[39m] - ❌ Unhandled Rejection: Image file format avif not allowed

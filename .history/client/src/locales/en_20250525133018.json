@@ -1,0 +1,44 @@
+{
+  "navbar": {
+    "home": "Home",
+    "cars": "All Cars",
+    "dashboard": "Dashboard",
+    "language": "Language",
+    "login": "Login / Register",
+    "profile": "Profile",
+    "settings": "Settings",
+    "logout": "Logout",
+    "light": "Light Mode",
+    "dark": "Dark Mode"
+  },
+  
+  "home": {
+    "availableCars": "Available Cars",
+    "loading": "Loading cars...",
+    "noCars": "No cars available.",
+    "error": "❌ Failed to load cars."
+  },
+  
+  "cars": {
+    "title": "Our Cars",
+    "count": "{{count}} car available",
+    "count_plural": "{{count}} cars available"
+  },
+  "filter": {
+    "search": "Search",
+    "searchPlaceholder": "Search by keyword, make, model...",
+    "make": "Make",
+    "model": "Model",
+    "price": "Price (€)",
+    "year": "Year",
+    "fuelType": "Fuel Type",
+    "transmission": "Transmission",
+    "driveType": "Drive Type",
+    "emissionClass": "Emission Class",
+    "color": "Color",
+    "interior": "Interior",
+    "maxMileage": "Max Mileage (km)",
+    "clear": "Clear Filters"
+  }
+
+}

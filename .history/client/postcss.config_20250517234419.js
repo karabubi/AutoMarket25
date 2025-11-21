@@ -1,0 +1,16 @@
+
+//Users/salehalkarabubi/works/project/AutoMarket25/client/postcss.config.js
+
+// export default {
+//     plugins: {
+//       '@tailwindcss/postcss': {},
+//       autoprefixer: {},
+//     },
+//   };
+  
+  export default {
+  plugins: {
+    '@tailwindcss/postcss': {},
+    autoprefixer: {},
+  },
+};
