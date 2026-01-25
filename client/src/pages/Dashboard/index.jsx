@@ -1,9 +1,11 @@
 
-//Users/salehalkarabubi/works/project/AutoMarket25/client/src/pages/Dashboard/index.jsx
+
+///Users/salehalkarabubi/works/27-05-2025 AutoMarket25/AutoMarket25/client/src/pages/Dashboard/index.jsx
 import { Routes, Route } from 'react-router-dom';
 import DashboardLayout from '../../components/Dashboard/DashboardLayout';
 import MyListings from '../../components/Dashboard/MyListings';
-import AddCar from '../../components/Dashboard/AddCar';
+import AddCar from "./AddCar";
+
 import Settings from '../../components/Dashboard/Settings';
 
 const Dashboard = () => (

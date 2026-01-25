@@ -1,4 +1,6 @@
 
+
+
 ///Users/salehalkarabubi/works/27-05-2025 AutoMarket25/AutoMarket25/client/src/utils/api.js
 
 import axios from "axios";
@@ -77,17 +79,15 @@ export const deleteAllPayments = (token) =>
   API.delete("/payments/admin/wipe", {
     headers: { Authorization: `Bearer ${token}` },
   });
-
 /* 🖼️ CAR IMAGES */
 export const uploadCarImages = (carId, files, token) => {
   const formData = new FormData();
-  formData.append("car_id", carId);
-  files.forEach((file) => formData.append("images", file));
+  files.forEach((file) => formData.append("images", file)); // ✅ key must be "images"
 
-  return API.post("/cars/images/upload", formData, {
+  return API.post(`/cars/${carId}/images`, formData, {
     headers: {
       Authorization: `Bearer ${token}`,
-      "Content-Type": "multipart/form-data",
+      // ✅ DO NOT set Content-Type manually (axios sets boundary correctly)
     },
   });
 };
@@ -95,7 +95,7 @@ export const uploadCarImages = (carId, files, token) => {
 export const fetchCarImages = (carId) => API.get(`/cars/${carId}/images`);
 
 export const deleteCarImage = (imageId, token) =>
-  API.delete(`/cars/images/${imageId}`, {
+  API.delete(`/car-images/${imageId}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 

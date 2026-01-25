@@ -1,7 +1,7 @@
 
-//Users/salehalkarabubi/works/27-05-2025 AutoMarket25/AutoMarket25/server/src/routes/carRoutes.js
+///Users/salehalkarabubi/works/27-05-2025 AutoMarket25/AutoMarket25/server/src/routes/carRoutes.js
 
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
 const {
@@ -11,62 +11,64 @@ const {
   getMyCars,
   deleteCar,
   deleteAllCars,
-} = require('../controllers/carController');
+} = require("../controllers/carController");
 
 const {
   uploadCarImages,
   getImagesByCarId,
   deleteImageById,
-} = require('../controllers/carImageController');
+} = require("../controllers/carImageController");
 
-const protect = require('../middleware/authMiddleware');
-const isAdmin = require('../middleware/isAdmin');
-const { upload } = require('../utils/cloudinary');
+const protect = require("../middleware/authMiddleware");
+const isAdmin = require("../middleware/isAdmin");
+const { upload } = require("../utils/cloudinary");
 
-// ===================== PUBLIC ROUTES =====================
+// ✅ Helper: wrap multer so errors return JSON and DON'T crash nodemon
+const multerWrap = (mw) => (req, res, next) => {
+  mw(req, res, (err) => {
+    if (!err) return next();
+    return res.status(400).json({ message: err.message || "Upload error" });
+  });
+};
 
-// 🟢 Get all cars (public, admin-enhanced with owner names)
-router.get('/', getAllCars);
+/* ===================== PUBLIC ===================== */
+router.get("/", getAllCars);
 
-// 🟢 Get images for a specific car
-router.get('/:carId/images', getImagesByCarId);
+/* ===================== AUTH ===================== */
+router.get("/my", protect, getMyCars);
+router.post("/", protect, createCar);
+router.delete("/:id", protect, deleteCar);
 
-// ===================== AUTHENTICATED ROUTES =====================
+/* ===================== ADMIN ===================== */
+router.delete("/admin/wipe", protect, isAdmin, deleteAllCars);
 
-// 🔒 Get current user's own cars
-router.get('/my', protect, getMyCars);
-
-// 🔒 Create a new car listing
-router.post('/', protect, createCar);
-
-// 🔒 Delete a specific car owned by the user
-router.delete('/:id', protect, deleteCar);
-
-// ===================== ADMIN ROUTES =====================
-
-// 🔒 Delete ALL cars and their images (admin only)
-router.delete('/admin/wipe', protect, isAdmin, deleteAllCars);
-
-// ===================== IMAGE ROUTES =====================
-
-// 🔒 Upload a single car image (used in quick upload forms)
-router.post('/upload', protect, upload.single('image'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ message: 'No file uploaded' });
+/* ===================== IMAGES ===================== */
+// Single quick upload (optional)
+router.post(
+  "/upload",
+  protect,
+  multerWrap(upload.single("image")),
+  (req, res) => {
+    if (!req.file) return res.status(400).json({ message: "No file uploaded" });
+    res.status(200).json({ url: req.file.path });
   }
-  res.status(200).json({ url: req.file.path });
-});
+);
 
-// 🔒 Upload multiple car images
-router.post('/images/upload', protect, upload.array('images', 10), uploadCarImages);
+// Get images for car
+router.get("/:carId/images", getImagesByCarId);
 
-// 🔒 Delete a car image by its ID
-router.delete('/images/:id', protect, deleteImageById);
+// Upload multiple images for car
+router.post(
+  "/:carId/images/upload",
+  protect,
+  multerWrap(upload.array("images", 10)),
+  uploadCarImages
+);
 
-// ===================== MUST COME LAST =====================
+// Delete image by image id
+router.delete("/images/:id", protect, deleteImageById);
 
-// 🟢 Get a single car by ID (dynamic route must be last!)
-router.get('/:id', getCarById);
+/* ===================== MUST BE LAST ===================== */
+router.get("/:id", getCarById);
 
 module.exports = router;
-

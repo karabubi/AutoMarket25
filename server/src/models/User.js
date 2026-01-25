@@ -1,5 +1,4 @@
-//Users/salehalkarabubi/works/project/AutoMarket25/server/src/models/User.js
-
+///Users/salehalkarabubi/works/27-05-2025 AutoMarket25/AutoMarket25/server/src/models/User.js
 const db = require('../utils/db');
 const bcrypt = require('bcryptjs');
 

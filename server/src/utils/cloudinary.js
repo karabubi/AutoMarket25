@@ -1,45 +1,39 @@
 
-///Users/salehalkarabubi/works/project/AutoMarket25/server/src/utils/cloudinary.js
+///Users/salehalkarabubi/works/27-05-2025 AutoMarket25/AutoMarket25/server/src/utils/cloudinary.js
+const cloudinary = require("cloudinary").v2;
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const multer = require("multer");
 
-
-const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
-const multer = require('multer');
-
-// ✅ Validate that env variables are set
 if (
   !process.env.CLOUDINARY_CLOUD_NAME ||
   !process.env.CLOUDINARY_API_KEY ||
   !process.env.CLOUDINARY_API_SECRET
 ) {
-  throw new Error('❌ Missing Cloudinary configuration in .env file');
+  throw new Error("❌ Missing Cloudinary configuration in .env file");
 }
 
-// ✅ Configure Cloudinary with environment variables
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// ✅ Setup Cloudinary storage with custom settings
 const storage = new CloudinaryStorage({
   cloudinary,
-  params: {
-    folder: 'automarket25',
-    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
-    transformation: [{ width: 800, height: 600, crop: 'limit' }],
-  },
+  params: async () => ({
+    folder: "automarket25",
+    resource_type: "image",
+    // Accept modern formats too
+    allowed_formats: ["jpg", "jpeg", "png", "webp", "avif", "heic", "heif"],
+    // Convert to a stable format for your app (prevents "avif not allowed" issues)
+    format: "jpg",
+    transformation: [{ width: 1600, height: 1200, crop: "limit" }],
+  }),
 });
 
-// ✅ Setup multer middleware with file size limit
 const upload = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // max 5MB
+  limits: { fileSize: 8 * 1024 * 1024 }, // 8MB
 });
 
-// ✅ Export configured modules
-module.exports = {
-  cloudinary,
-  upload,
-};
+module.exports = { cloudinary, upload };

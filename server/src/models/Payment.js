@@ -1,6 +1,4 @@
-
-//Users/salehalkarabubi/works/project/AutoMarket25/server/src/models/Payment.js
-
+///Users/salehalkarabubi/works/27-05-2025 AutoMarket25/AutoMarket25/server/src/models/Payment.js
 
 const db = require('../utils/db');
 

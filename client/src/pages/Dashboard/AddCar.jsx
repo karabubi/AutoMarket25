@@ -1,143 +1,241 @@
 
-//Users/salehalkarabubi/works/project/AutoMarket25/client/src/pages/Dashboard/AddCar.jsx
+////Users/salehalkarabubi/works/27-05-2025 AutoMarket25/AutoMarket25/client/src/pages/Dashboard/AddCar.jsx
 
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import ImageUpload from './ImageUpload';
-import { useState } from 'react';
-import MultipleImageUpload from '../../components/MultipleImageUpload';
+import { useEffect, useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import MultipleImageUpload from "../../components/MultipleImageUpload";
+import API, { uploadCarImages } from "../../utils/api";
+
+// ✅ helper: allow empty numeric input without crashing
+const numOptional = () =>
+  z.preprocess(
+    (v) => (v === "" || v === null || v === undefined ? undefined : Number(v)),
+    z.number().optional()
+  );
+
+const numRequired = (min, msg) =>
+  z.preprocess((v) => Number(v), z.number().min(min, msg));
 
 const schema = z.object({
-  make: z.string().min(1, 'Make is required'),
-  model: z.string().min(1, 'Model is required'),
-  year: z.number().min(1886, 'Year must be valid'),
-  price: z.number().positive('Price must be positive'),
+  make: z.string().min(1, "Make is required"),
+  model: z.string().min(1, "Model is required"),
+  year: numRequired(1886, "Year must be valid"),
+  price: z.preprocess((v) => Number(v), z.number().positive("Price must be positive")),
+
   description: z.string().optional(),
-  image_url: z.string().url('Invalid image URL').optional(),
-  image_urls: z.array(z.string().url()).optional(),
-  mileage: z.number().int().optional(),
-  engine_size: z.number().optional(),
-  power_kw: z.number().optional(),
-  power_hp: z.number().optional(),
-  drive_type: z.string().optional(),
   fuel_type: z.string().optional(),
-  consumption_combined: z.number().optional(),
-  co2_emission: z.number().optional(),
-  seats: z.number().int().optional(),
-  doors: z.number().int().optional(),
+  drive_type: z.string().optional(),
+
+  mileage: numOptional(),
+  engine_size: numOptional(),
+  power_kw: numOptional(),
+  power_hp: numOptional(),
+  consumption_combined: numOptional(),
+  co2_emission: numOptional(),
+  seats: numOptional(),
+  doors: numOptional(),
   transmission: z.string().optional(),
   emission_class: z.string().optional(),
   first_registration: z.string().optional(),
   climate_control: z.string().optional(),
   color: z.string().optional(),
   interior: z.string().optional(),
-  trailer_weight_braked: z.number().optional(),
-  trailer_weight_unbraked: z.number().optional(),
-  weight: z.number().optional(),
-  cylinders: z.number().optional(),
-  tank_size: z.number().optional()
+  trailer_weight_braked: numOptional(),
+  trailer_weight_unbraked: numOptional(),
+  weight: numOptional(),
+  cylinders: numOptional(),
+  tank_size: numOptional(),
+  battery_capacity: numOptional(),
 });
 
-const AddCar = () => {
-  const [message, setMessage] = useState('');
-  const [uploadedImages, setUploadedImages] = useState([]);
-  const { register, handleSubmit, setValue, reset } = useForm({
+function extractCarId(payload) {
+  return payload?.id || payload?.data?.id || payload?.car?.id || payload?.data?.car?.id || null;
+}
+
+export default function AddCar() {
+  const [message, setMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  // main image + extra images picked before submit
+  const [mainFile, setMainFile] = useState(null);
+  const [mainPreview, setMainPreview] = useState("");
+  const [extraFiles, setExtraFiles] = useState([]);
+
+  const { register, handleSubmit, watch, reset } = useForm({
     resolver: zodResolver(schema),
+    defaultValues: { year: new Date().getFullYear() },
   });
 
+  const fuelType = watch("fuel_type");
+  const showBattery = useMemo(() => fuelType === "Electric", [fuelType]);
+
+  useEffect(() => {
+    return () => {
+      if (mainPreview) URL.revokeObjectURL(mainPreview);
+    };
+  }, [mainPreview]);
+
+  const onPickMainImage = (e) => {
+    const file = e.target.files?.[0] || null;
+    setMainFile(file);
+
+    if (mainPreview) URL.revokeObjectURL(mainPreview);
+    setMainPreview(file ? URL.createObjectURL(file) : "");
+  };
+
   const onSubmit = async (data) => {
-    const token = localStorage.getItem('token');
-    if (!token) return setMessage('❌ Please log in.');
+    const token = localStorage.getItem("token");
+    if (!token) return setMessage("❌ Please log in.");
+
+    setSubmitting(true);
+    setMessage("");
 
     try {
-      const res = await fetch('/api/cars', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          ...data,
-          image_urls: uploadedImages,
-        }),
+      // ✅ 1) Create car FIRST (Axios uses correct baseURL in prod)
+      const createdRes = await API.post("/cars", data, {
+        headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || 'Failed to add car');
+      const carId = extractCarId(createdRes.data);
+      if (!carId) throw new Error("Car created but carId not returned.");
+
+      // ✅ 2) Upload images (main first so it becomes cars.image_url on server)
+      const allToUpload = [];
+      if (mainFile) allToUpload.push(mainFile);
+      if (extraFiles.length) allToUpload.push(...extraFiles);
+
+      if (allToUpload.length) {
+        await uploadCarImages(carId, allToUpload, token);
       }
 
-      setMessage('✅ Car added successfully!');
-      reset();
-      setUploadedImages([]);
+      setMessage("✅ Car created and images uploaded successfully!");
+      reset({ year: new Date().getFullYear() });
+
+      setMainFile(null);
+      if (mainPreview) URL.revokeObjectURL(mainPreview);
+      setMainPreview("");
+      setExtraFiles([]);
     } catch (err) {
-      setMessage(`❌ ${err.message}`);
+      const msg =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Something went wrong while saving the car.";
+      setMessage(`❌ ${msg}`);
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="max-w-lg mx-auto p-4 bg-white rounded shadow">
-      <h2 className="text-xl font-bold mb-4">Add New Car</h2>
-      {message && <p className="text-center text-sm mb-4">{message}</p>}
+    <section className="min-h-screen bg-white py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-3xl mx-auto bg-white p-8 rounded-xl shadow-md">
+        <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">🚘 Add New Car</h2>
 
-      {/* Basic Fields */}
-      <input {...register('make')} placeholder="Make" className="mb-2 p-2 border w-full" />
-      <input {...register('model')} placeholder="Model" className="mb-2 p-2 border w-full" />
-      <input {...register('year', { valueAsNumber: true })} type="number" placeholder="Year" className="mb-2 p-2 border w-full" />
-      <input {...register('price', { valueAsNumber: true })} type="number" placeholder="Price" className="mb-2 p-2 border w-full" />
+        {message && (
+          <p className={`text-center mb-4 font-semibold ${message.startsWith("✅") ? "text-green-600" : "text-red-600"}`}>
+            {message}
+          </p>
+        )}
 
-      {/* Extended Technical Fields */}
-      <input {...register('mileage', { valueAsNumber: true })} type="number" placeholder="Mileage (km)" className="mb-2 p-2 border w-full" />
-      <input {...register('engine_size', { valueAsNumber: true })} type="number" step="0.1" placeholder="Engine Size (L)" className="mb-2 p-2 border w-full" />
-      <input {...register('power_kw', { valueAsNumber: true })} type="number" placeholder="Power (kW)" className="mb-2 p-2 border w-full" />
-      <input {...register('power_hp', { valueAsNumber: true })} type="number" placeholder="Power (PS)" className="mb-2 p-2 border w-full" />
-      <input {...register('consumption_combined', { valueAsNumber: true })} type="number" step="0.1" placeholder="Consumption (L/100km)" className="mb-2 p-2 border w-full" />
-      <input {...register('co2_emission', { valueAsNumber: true })} type="number" placeholder="CO2 Emission (g/km)" className="mb-2 p-2 border w-full" />
-      <input {...register('seats', { valueAsNumber: true })} type="number" placeholder="Seats" className="mb-2 p-2 border w-full" />
-      <input {...register('doors', { valueAsNumber: true })} type="number" placeholder="Doors" className="mb-2 p-2 border w-full" />
-      <input {...register('transmission')} placeholder="Transmission" className="mb-2 p-2 border w-full" />
-      <input {...register('emission_class')} placeholder="Emission Class" className="mb-2 p-2 border w-full" />
-      <input {...register('first_registration')} type="date" className="mb-2 p-2 border w-full" />
-      <input {...register('climate_control')} placeholder="Climate Control" className="mb-2 p-2 border w-full" />
-      <input {...register('color')} placeholder="Color" className="mb-2 p-2 border w-full" />
-      <input {...register('interior')} placeholder="Interior" className="mb-2 p-2 border w-full" />
-      <input {...register('trailer_weight_braked', { valueAsNumber: true })} type="number" placeholder="Trailer Weight (Braked)" className="mb-2 p-2 border w-full" />
-      <input {...register('trailer_weight_unbraked', { valueAsNumber: true })} type="number" placeholder="Trailer Weight (Unbraked)" className="mb-2 p-2 border w-full" />
-      <input {...register('weight', { valueAsNumber: true })} type="number" placeholder="Weight (kg)" className="mb-2 p-2 border w-full" />
-      <input {...register('cylinders', { valueAsNumber: true })} type="number" placeholder="Cylinders" className="mb-2 p-2 border w-full" />
-      <input {...register('tank_size', { valueAsNumber: true })} type="number" placeholder="Tank Size (L)" className="mb-2 p-2 border w-full" />
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid md:grid-cols-2 gap-4">
+            <input {...register("make")} placeholder="Make" className="input" />
+            <input {...register("model")} placeholder="Model" className="input" />
+            <input {...register("year")} type="number" placeholder="Year" className="input" />
+            <input {...register("price")} type="number" placeholder="Price (€)" className="input" />
 
-      {/* Select Fields */}
-      <select {...register('drive_type')} className="mb-2 p-2 border w-full">
-        <option value="">Drive Type</option>
-        <option value="Front">Front</option>
-        <option value="Rear">Rear</option>
-        <option value="All-Wheel">All-Wheel</option>
-      </select>
+            <select {...register("fuel_type")} className="input">
+              <option value="">Fuel Type</option>
+              <option value="Petrol">Petrol</option>
+              <option value="Diesel">Diesel</option>
+              <option value="Electric">Electric</option>
+              <option value="Hybrid">Hybrid</option>
+            </select>
 
-      <select {...register('fuel_type')} className="mb-2 p-2 border w-full">
-        <option value="">Fuel Type</option>
-        <option value="Petrol">Petrol</option>
-        <option value="Diesel">Diesel</option>
-        <option value="Electric">Electric</option>
-        <option value="Hybrid">Hybrid</option>
-      </select>
+            {showBattery && (
+              <input
+                {...register("battery_capacity")}
+                type="number"
+                placeholder="Battery Capacity (kWh)"
+                className="input"
+              />
+            )}
 
-      {/* Description + Images */}
-      <textarea {...register('description')} placeholder="Description" className="mb-2 p-2 border w-full" />
-      <ImageUpload onUploadSuccess={(url) => setValue('image_url', url)} />
-      <MultipleImageUpload onUploadComplete={(urls) => setUploadedImages(urls)} />
+            <input {...register("power_kw")} type="number" placeholder="Power (kW)" className="input" />
+            <input {...register("power_hp")} type="number" placeholder="Power (PS)" className="input" />
+            <input {...register("mileage")} type="number" placeholder="Mileage (km)" className="input" />
+            <input {...register("engine_size")} type="number" placeholder="Engine Size (L)" className="input" />
+            <input {...register("co2_emission")} type="number" placeholder="CO₂ Emission (g/km)" className="input" />
+            <input {...register("consumption_combined")} type="number" placeholder="Consumption (L/100km)" className="input" />
+            <input {...register("seats")} type="number" placeholder="Seats" className="input" />
+            <input {...register("doors")} type="number" placeholder="Doors" className="input" />
+            <input {...register("transmission")} placeholder="Transmission" className="input" />
+            <input {...register("emission_class")} placeholder="Emission Class" className="input" />
+            <input {...register("first_registration")} type="date" className="input" />
+            <input {...register("climate_control")} placeholder="Climate Control" className="input" />
+            <input {...register("color")} placeholder="Color" className="input" />
+            <input {...register("interior")} placeholder="Interior" className="input" />
+            <input {...register("trailer_weight_braked")} type="number" placeholder="Trailer Weight (Braked)" className="input" />
+            <input {...register("trailer_weight_unbraked")} type="number" placeholder="Trailer Weight (Unbraked)" className="input" />
+            <input {...register("weight")} type="number" placeholder="Weight (kg)" className="input" />
+            <input {...register("cylinders")} type="number" placeholder="Cylinders" className="input" />
+            <input {...register("tank_size")} type="number" placeholder="Tank Size (L)" className="input" />
 
-      <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 w-full">Add Car</button>
-    </form>
+            <select {...register("drive_type")} className="input">
+              <option value="">Drive Type</option>
+              <option value="Front">Front</option>
+              <option value="Rear">Rear</option>
+              <option value="All-Wheel">All-Wheel</option>
+            </select>
+          </div>
+
+          <textarea
+            {...register("description")}
+            placeholder="Description"
+            className="w-full p-3 border rounded-md focus:outline-none focus:ring"
+            rows="4"
+          />
+
+          {/* ✅ Main image */}
+          <div className="bg-gray-50 p-4 rounded shadow-sm">
+            <label className="block font-medium mb-2">Main Image (optional)</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={onPickMainImage}
+              disabled={submitting}
+              className="w-full text-sm"
+            />
+            {mainPreview && (
+              <img
+                src={mainPreview}
+                alt="Main preview"
+                className="w-40 h-28 object-cover rounded border mt-2"
+              />
+            )}
+            <p className="text-xs text-gray-600 mt-2">
+              Main image uploads when you click <b>Submit Car</b>.
+            </p>
+          </div>
+
+          {/* ✅ Extra images picker */}
+          <MultipleImageUpload
+            onFilesChange={(files) => setExtraFiles(files)}
+            disabled={submitting}
+            label="Upload Additional Images (optional)"
+          />
+
+          <button
+            type="submit"
+            disabled={submitting}
+            className="w-full bg-blue-600 text-white py-3 rounded-md text-lg font-semibold hover:bg-blue-700 transition disabled:opacity-60"
+          >
+            {submitting ? "Saving..." : "Submit Car"}
+          </button>
+        </form>
+      </div>
+    </section>
   );
-};
-
-export default AddCar;
-
-
-
-
-
-
+}

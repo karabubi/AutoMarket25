@@ -1,5 +1,4 @@
-//Users/salehalkarabubi/works/project/AutoMarket25/server/src/routes/emailRoutes.js
-
+///Users/salehalkarabubi/works/27-05-2025 AutoMarket25/AutoMarket25/server/src/routes/emailRoutes.js
 const express = require('express');
 const router = express.Router();
 const emailController = require('../controllers/emailController');

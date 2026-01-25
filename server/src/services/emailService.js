@@ -1,5 +1,5 @@
 
-//Users/salehalkarabubi/works/project/AutoMarket25/server/services/emailService.js
+///Users/salehalkarabubi/works/27-05-2025 AutoMarket25/AutoMarket25/server/src/services/emailService.js
 const nodemailer = require('nodemailer');
 const transporter = nodemailer.createTransport({
   service: 'gmail',

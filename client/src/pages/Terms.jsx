@@ -1,7 +1,5 @@
-//Users/salehalkarabubi/works/project/AutoMarket25/client/src/pages/Terms.jsx
 
-
-
+///Users/salehalkarabubi/works/27-05-2025 AutoMarket25/AutoMarket25/client/src/pages/Terms.jsx
 const Terms = () => {
   return (
     <section className="min-h-screen bg-white text-gray-800 py-16 px-4 sm:px-6 lg:px-8">

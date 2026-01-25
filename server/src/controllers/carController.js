@@ -1,9 +1,9 @@
 
-//Users/salehalkarabubi/works/27-05-2025 AutoMarket25/AutoMarket25/server/src/controllers/carController.js
-const Car = require('../models/Car');
-const db = require('../utils/db');
+///Users/salehalkarabubi/works/27-05-2025 AutoMarket25/AutoMarket25/server/src/controllers/carController.js
+const Car = require("../models/Car");
+const db = require("../utils/db");
 
-// Admin: Get all cars with user name and images
+// Public: Get all cars with owner name + images
 exports.getAllCars = async (req, res) => {
   try {
     const result = await db.query(`
@@ -16,161 +16,175 @@ exports.getAllCars = async (req, res) => {
     const enriched = await Promise.all(
       result.rows.map(async (car) => {
         const images = await db.query(
-          'SELECT image_url FROM car_images WHERE car_id = $1',
+          "SELECT id, image_url FROM car_images WHERE car_id = $1 ORDER BY created_at DESC",
           [car.id]
         );
         return { ...car, images: images.rows };
       })
     );
 
-    res.status(200).json(enriched);
+    return res.status(200).json(enriched);
   } catch (err) {
-    console.error('getAllCars error:', err.message);
-    res.status(500).json({ message: 'Failed to fetch cars.' });
+    console.error("getAllCars error:", err);
+    return res.status(500).json({ message: "Failed to fetch cars." });
   }
 };
 
 // Logged-in user's cars
 exports.getMyCars = async (req, res) => {
   try {
-    const userId = req.user.id; // ✅ FIXED: Access id from object
-    if (!userId) return res.status(400).json({ message: 'Missing user ID' });
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
     const cars = await Car.findByUserId(userId);
+
     const enriched = await Promise.all(
       cars.map(async (car) => {
         const images = await db.query(
-          'SELECT image_url FROM car_images WHERE car_id = $1',
+          "SELECT id, image_url FROM car_images WHERE car_id = $1 ORDER BY created_at DESC",
           [car.id]
         );
         return { ...car, images: images.rows };
       })
     );
 
-    res.json(enriched);
+    return res.status(200).json(enriched);
   } catch (err) {
-    console.error('getMyCars error:', err.message);
-    res.status(500).json({ message: 'Failed to fetch user cars.' });
+    console.error("getMyCars error:", err);
+    return res.status(500).json({ message: "Failed to fetch user cars." });
   }
 };
 
 // Get a single car
 exports.getCarById = async (req, res) => {
   try {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) return res.status(400).json({ message: 'Invalid car ID' });
+    const id = Number(req.params.id);
+    if (!id || Number.isNaN(id)) return res.status(400).json({ message: "Invalid car ID" });
 
     const car = await Car.findById(id);
-    if (!car) return res.status(404).json({ message: 'Car not found' });
+    if (!car) return res.status(404).json({ message: "Car not found" });
 
     const images = await db.query(
-      'SELECT image_url FROM car_images WHERE car_id = $1',
+      "SELECT id, image_url FROM car_images WHERE car_id = $1 ORDER BY created_at DESC",
       [id]
     );
-    car.images = images.rows;
 
-    res.json(car);
+    return res.status(200).json({ ...car, images: images.rows });
   } catch (err) {
-    console.error('getCarById error:', err.message);
-    res.status(500).json({ message: 'Failed to fetch car.' });
+    console.error("getCarById error:", err);
+    return res.status(500).json({ message: "Failed to fetch car." });
   }
 };
 
 // Create new car
 exports.createCar = async (req, res) => {
   try {
-    const userId = req.user.id;
-    if (!userId) return res.status(401).json({ message: 'Unauthorized' });
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
-    const {
-      make, model, year, price, description, image_url, image_urls,
-      mileage, engine_size, power_kw, power_hp, drive_type, fuel_type,
-      consumption_combined, co2_emission, seats, doors, transmission,
-      emission_class, first_registration, climate_control, color, interior,
-      trailer_weight_braked, trailer_weight_unbraked, weight, cylinders, tank_size
-    } = req.body;
+    const body = req.body || {};
+
+    // ✅ Normalize numbers (because frontend may send strings)
+    const year = body.year !== undefined ? Number(body.year) : undefined;
+    const price = body.price !== undefined ? Number(body.price) : undefined;
+
+    if (!body.make || !body.model) {
+      return res.status(400).json({ message: "Make and model are required." });
+    }
+    if (year && Number.isNaN(year)) return res.status(400).json({ message: "Invalid year" });
+    if (price && Number.isNaN(price)) return res.status(400).json({ message: "Invalid price" });
 
     const car = await Car.create({
       user_id: userId,
-      make, model, year, price, description, image_url,
-      mileage, engine_size, power_kw, power_hp, drive_type, fuel_type,
-      consumption_combined, co2_emission, seats, doors, transmission,
-      emission_class, first_registration, climate_control, color, interior,
-      trailer_weight_braked, trailer_weight_unbraked, weight, cylinders, tank_size
+      make: body.make,
+      model: body.model,
+      year,
+      price,
+      description: body.description,
+      image_url: body.image_url,
+      mileage: body.mileage,
+      engine_size: body.engine_size,
+      power_kw: body.power_kw,
+      power_hp: body.power_hp,
+      drive_type: body.drive_type,
+      fuel_type: body.fuel_type,
+      consumption_combined: body.consumption_combined,
+      co2_emission: body.co2_emission,
+      seats: body.seats,
+      doors: body.doors,
+      transmission: body.transmission,
+      emission_class: body.emission_class,
+      first_registration: body.first_registration,
+      climate_control: body.climate_control,
+      color: body.color,
+      interior: body.interior,
+      trailer_weight_braked: body.trailer_weight_braked,
+      trailer_weight_unbraked: body.trailer_weight_unbraked,
+      weight: body.weight,
+      cylinders: body.cylinders,
+      tank_size: body.tank_size,
     });
 
-    if (Array.isArray(image_urls)) {
-      await Promise.all(image_urls.map((url) =>
-        db.query('INSERT INTO car_images (car_id, image_url) VALUES ($1, $2)', [car.id, url])
-      ));
+    // ✅ Insert extra images if provided
+    if (Array.isArray(body.image_urls) && body.image_urls.length > 0) {
+      await Promise.all(
+        body.image_urls.map((url) =>
+          db.query("INSERT INTO car_images (car_id, image_url) VALUES ($1, $2)", [car.id, url])
+        )
+      );
     }
 
-    res.status(201).json(car);
+    // return car + images
+    const images = await db.query(
+      "SELECT id, image_url FROM car_images WHERE car_id = $1 ORDER BY created_at DESC",
+      [car.id]
+    );
+
+    return res.status(201).json({ ...car, images: images.rows });
   } catch (err) {
-    console.error('createCar error:', err.message);
-    res.status(500).json({ message: 'Failed to create car.' });
-  }
-};
-
-// Update a car
-exports.updateCar = async (req, res) => {
-  try {
-    const car = await Car.findById(req.params.id);
-    if (!car) return res.status(404).json({ message: 'Car not found' });
-    if (car.user_id !== req.user.id && !req.user.is_admin) return res.status(403).json({ message: 'Not authorized' });
-
-    const fields = [
-      'make', 'model', 'year', 'price', 'description', 'image_url',
-      'mileage', 'engine_size', 'power_kw', 'power_hp', 'drive_type', 'fuel_type',
-      'consumption_combined', 'co2_emission', 'seats', 'doors', 'transmission',
-      'emission_class', 'first_registration', 'climate_control', 'color', 'interior',
-      'trailer_weight_braked', 'trailer_weight_unbraked', 'weight', 'cylinders', 'tank_size'
-    ];
-
-    const updateData = {};
-    fields.forEach((field) => {
-      if (req.body[field] !== undefined) updateData[field] = req.body[field];
-    });
-
-    const updated = await Car.update(req.params.id, updateData);
-    res.json(updated);
-  } catch (err) {
-    console.error('updateCar error:', err.message);
-    res.status(500).json({ message: 'Failed to update car.' });
+    console.error("createCar error:", err);
+    return res.status(500).json({ message: "Failed to create car." });
   }
 };
 
 // Delete single car
 exports.deleteCar = async (req, res) => {
   try {
-    const car = await Car.findById(req.params.id);
-    if (!car) return res.status(404).json({ message: 'Car not found' });
-
-    if (car.user_id !== req.user.id && !req.user.is_admin) {
-      return res.status(403).json({ message: 'Not authorized to delete this car' });
+    const carId = Number(req.params.id);
+    if (!carId || Number.isNaN(carId)) {
+      return res.status(400).json({ message: "Invalid car id" });
     }
 
-    await db.query('DELETE FROM car_images WHERE car_id = $1', [req.params.id]);
-    await Car.delete(req.params.id);
+    const car = await Car.findById(carId);
+    if (!car) return res.status(404).json({ message: "Car not found" });
 
-    res.json({ message: 'Car deleted successfully' });
+    if (car.user_id !== req.user.id && !req.user.is_admin) {
+      return res.status(403).json({ message: "Not authorized to delete this car" });
+    }
+
+    await db.query("DELETE FROM car_images WHERE car_id = $1", [carId]);
+    await Car.delete(carId);
+
+    return res.status(200).json({ message: "Car deleted successfully" });
   } catch (err) {
-    console.error('deleteCar error:', err.message);
-    res.status(500).json({ message: 'Failed to delete car.' });
+    console.error("deleteCar error:", err);
+    return res.status(500).json({ message: "Failed to delete car." });
   }
 };
 
 // Admin: Delete all cars
 exports.deleteAllCars = async (req, res) => {
   try {
-    if (!req.user.is_admin) return res.status(403).json({ message: 'Only admins can delete all cars.' });
+    if (!req.user.is_admin) {
+      return res.status(403).json({ message: "Only admins can delete all cars." });
+    }
 
-    await db.query('DELETE FROM car_images');
-    await db.query('DELETE FROM cars');
+    await db.query("DELETE FROM car_images");
+    await db.query("DELETE FROM cars");
 
-    res.status(200).json({ message: 'All cars and related images deleted successfully.' });
+    return res.status(200).json({ message: "All cars and related images deleted successfully." });
   } catch (err) {
-    console.error('deleteAllCars error:', err.message);
-    res.status(500).json({ message: 'Failed to delete all cars.' });
+    console.error("deleteAllCars error:", err);
+    return res.status(500).json({ message: "Failed to delete all cars." });
   }
 };
