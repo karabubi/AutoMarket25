@@ -1,7 +1,51 @@
 
-//Users/salehalkarabubi/works/27-05-2025 AutoMarket25/AutoMarket25/client/src/pages/AdminReport.jsx
-import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+// /Users/salehalkarabubi/works/27-05-2025 AutoMarket25/AutoMarket25/client/src/pages/AdminReport.jsx
+import { useCallback, useEffect, useMemo, useState } from "react";
+import API from "../utils/api";
+
+/* -------------------------
+   ✅ Stable helper functions (outside component)
+   -> fixes exhaustive-deps warnings automatically
+-------------------------- */
+const roundToTwo = (num) => Math.round((num + Number.EPSILON) * 100) / 100;
+
+const parseNumber = (value) => {
+  if (typeof value === "number") return value;
+  if (typeof value !== "string") return 0;
+
+  const cleanValue = value.replace(/[^\d.-]/g, "").replace(/,/g, "");
+  const number = parseFloat(cleanValue);
+  return Number.isNaN(number) ? 0 : roundToTwo(number);
+};
+
+const formatCurrency = (value) => {
+  if (value === null || value === undefined) return "—";
+  return new Intl.NumberFormat("de-DE", {
+    style: "currency",
+    currency: "EUR",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value);
+};
+
+const downloadBlob = (blob, filename) => {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+};
+
+const escapeCsv = (v) => {
+  if (v === null || v === undefined) return "";
+  const s = String(v);
+  // wrap if contains comma, quote, newline
+  if (/[",\n]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+  return s;
+};
 
 const AdminReport = () => {
   const [report, setReport] = useState([]);
@@ -11,31 +55,15 @@ const AdminReport = () => {
     totalNotPaid: 0,
   });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
-  const fetchReport = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError('');
-      const token = localStorage.getItem('token');
-      const res = await axios.get('/api/admin/report', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      processReportData(res.data.report || []);
-    } catch (err) {
-      console.error('Error fetching report:', err);
-      setError('Failed to load report. Please try again later.');
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchReport();
-  }, [fetchReport]);
-
-  const processReportData = (rawData) => {
-    if (!rawData.length) {
+  /* -------------------------
+     ✅ Processing (stable)
+  -------------------------- */
+  const processReportData = useCallback((rawData) => {
+    if (!rawData?.length) {
+      setReport([]);
+      setTotals({ totalPrice: 0, totalPaid: 0, totalNotPaid: 0 });
       setLoading(false);
       return;
     }
@@ -44,57 +72,237 @@ const AdminReport = () => {
     let totalPaid = 0;
     let totalNotPaid = 0;
 
-    const processedData = rawData.map((item) => {
+    const processed = rawData.map((item) => {
       const price = parseNumber(item.price);
       const paid = parseNumber(item.paid_amount);
-      const not_paid_amount = paid < price ? roundToTwo(price - paid) : null;
+      const notPaid = paid < price ? roundToTwo(price - paid) : 0;
 
       totalPrice = roundToTwo(totalPrice + price);
       totalPaid = roundToTwo(totalPaid + paid);
-      if (not_paid_amount !== null) {
-        totalNotPaid = roundToTwo(totalNotPaid + not_paid_amount);
-      }
+      totalNotPaid = roundToTwo(totalNotPaid + notPaid);
 
       return {
         ...item,
         price,
         paid_amount: paid,
-        not_paid_amount,
+        not_paid_amount: notPaid,
       };
     });
 
-    setReport(processedData);
-    setTotals({ 
-      totalPrice, 
-      totalPaid,
-      totalNotPaid: Math.max(0, totalNotPaid)
-    });
+    setReport(processed);
+    setTotals({ totalPrice, totalPaid, totalNotPaid });
     setLoading(false);
-  };
+  }, []);
 
-  const parseNumber = (value) => {
-    if (typeof value === 'number') return value;
-    if (typeof value !== 'string') return 0;
-    
-    const cleanValue = value
-      .replace(/[^\d.-]/g, '')
-      .replace(/,/g, '');
-    
-    const number = parseFloat(cleanValue);
-    return isNaN(number) ? 0 : roundToTwo(number);
-  };
+  /* -------------------------
+     ✅ Fetch report
+  -------------------------- */
+  const fetchReport = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError("");
 
-  const roundToTwo = (num) => Math.round((num + Number.EPSILON) * 100) / 100;
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("Not logged in.");
+        setLoading(false);
+        return;
+      }
 
-  const formatCurrency = (value) => {
-    if (value === null || value === undefined) return '—';
-    return new Intl.NumberFormat('de-DE', {
-      style: 'currency',
-      currency: 'EUR',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(value);
-  };
+      // ✅ Works with localhost + Vercel (API baseURL should already include /api)
+      const res = await API.get("/admin/report", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      processReportData(res.data?.report || []);
+    } catch (err) {
+      console.error("Error fetching report:", err?.response?.data || err);
+      const msg =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        "Failed to load report. Please try again later.";
+      setError(msg);
+      setLoading(false);
+    }
+  }, [processReportData]);
+
+  useEffect(() => {
+    fetchReport();
+  }, [fetchReport]);
+
+  /* -------------------------
+     ✅ Export CSV
+  -------------------------- */
+  const exportCSV = useCallback(() => {
+    const headers = ["Make", "Model", "Price", "Paid", "Not Paid"];
+
+    const rows = report.map((item) => [
+      item.make || "",
+      item.model || "",
+      item.price ?? 0,
+      item.paid_amount ?? 0,
+      item.not_paid_amount ?? 0,
+    ]);
+
+    // add TOTAL row
+    rows.push([
+      "TOTAL",
+      "",
+      totals.totalPrice ?? 0,
+      totals.totalPaid ?? 0,
+      totals.totalNotPaid ?? 0,
+    ]);
+
+    const csv =
+      [headers, ...rows]
+        .map((r) => r.map(escapeCsv).join(","))
+        .join("\n") + "\n";
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const date = new Date().toISOString().slice(0, 10);
+    downloadBlob(blob, `admin_report_${date}.csv`);
+  }, [report, totals]);
+
+  /* -------------------------
+     ✅ Export PDF
+     - Tries jsPDF (real download)
+     - If not installed -> fallback print window (Save as PDF)
+  -------------------------- */
+  const exportPDF = useCallback(async () => {
+    const date = new Date().toISOString().slice(0, 10);
+    const filename = `admin_report_${date}.pdf`;
+
+    // 1) Try jsPDF if available
+    try {
+      const [{ jsPDF }, autoTableModule] = await Promise.all([
+        import("jspdf"),
+        import("jspdf-autotable"),
+      ]);
+
+      // jspdf-autotable attaches itself, but we keep module loaded
+      void autoTableModule;
+
+      const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
+
+      doc.setFontSize(14);
+      doc.text("AutoMarket25 - Admin Report", 40, 40);
+      doc.setFontSize(10);
+      doc.text(`Date: ${date}`, 40, 58);
+
+      const head = [["Make", "Model", "Price", "Paid", "Not Paid"]];
+      const body = report.map((item) => [
+        item.make || "—",
+        item.model || "—",
+        formatCurrency(item.price),
+        formatCurrency(item.paid_amount),
+        formatCurrency(item.not_paid_amount),
+      ]);
+
+      body.push([
+        "TOTAL",
+        "",
+        formatCurrency(totals.totalPrice),
+        formatCurrency(totals.totalPaid),
+        formatCurrency(totals.totalNotPaid),
+      ]);
+
+      /// eslint-disable-next-line no-undef
+      doc.autoTable({
+        head,
+        body,
+        startY: 80,
+        styles: { fontSize: 9, cellPadding: 6 },
+        headStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0] },
+        alternateRowStyles: { fillColor: [250, 250, 250] },
+      });
+
+      doc.save(filename);
+      return;
+    } catch (e) {
+      console.warn("jsPDF not installed, using print fallback.", e);
+    }
+
+    // 2) Fallback: open printable HTML (user can "Save as PDF")
+    const win = window.open("", "_blank", "width=1200,height=800");
+    if (!win) {
+      alert("Popup blocked. Please allow popups to export PDF.");
+      return;
+    }
+
+    const rowsHtml = report
+      .map(
+        (item) => `
+        <tr>
+          <td>${item.make || "—"}</td>
+          <td>${item.model || "—"}</td>
+          <td style="text-align:right">${formatCurrency(item.price)}</td>
+          <td style="text-align:right">${formatCurrency(item.paid_amount)}</td>
+          <td style="text-align:right">${formatCurrency(item.not_paid_amount)}</td>
+        </tr>
+      `
+      )
+      .join("");
+
+    const html = `
+      <html>
+        <head>
+          <title>${filename}</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 24px; }
+            h1 { margin: 0 0 6px 0; font-size: 20px; }
+            .meta { margin: 0 0 16px 0; color: #444; font-size: 12px; }
+            table { width: 100%; border-collapse: collapse; font-size: 12px; }
+            th, td { border: 1px solid #ddd; padding: 10px; }
+            th { background: #f3f3f3; text-align: left; }
+            tfoot td { font-weight: bold; background: #fafafa; }
+          </style>
+        </head>
+        <body>
+          <h1>AutoMarket25 - Admin Report</h1>
+          <p class="meta">Date: ${date}</p>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Make</th>
+                <th>Model</th>
+                <th style="text-align:right">Price</th>
+                <th style="text-align:right">Paid</th>
+                <th style="text-align:right">Not Paid</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml || `<tr><td colspan="5" style="text-align:center;color:#666">No report data available.</td></tr>`}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td>TOTAL</td>
+                <td></td>
+                <td style="text-align:right">${formatCurrency(totals.totalPrice)}</td>
+                <td style="text-align:right">${formatCurrency(totals.totalPaid)}</td>
+                <td style="text-align:right">${formatCurrency(totals.totalNotPaid)}</td>
+              </tr>
+            </tfoot>
+          </table>
+
+          <script>
+            window.onload = () => {
+              window.print();
+            };
+          </script>
+        </body>
+      </html>
+    `;
+
+    win.document.open();
+    win.document.write(html);
+    win.document.close();
+  }, [report, totals]);
+
+  /* -------------------------
+     ✅ Derived UI values
+  -------------------------- */
+  const hasData = useMemo(() => report.length > 0, [report]);
 
   if (loading) return <div className="text-center py-10">Loading report...</div>;
   if (error) return <div className="text-center py-10 text-red-600">{error}</div>;
@@ -103,14 +311,19 @@ const AdminReport = () => {
     <div className="p-6 max-w-7xl mx-auto">
       <div className="flex justify-end gap-4 mb-4">
         <button
-          onClick={() => alert('CSV export coming soon')}
-          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors"
+          onClick={exportCSV}
+          disabled={!hasData}
+          className="bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded hover:bg-green-700 transition-colors"
+          title={!hasData ? "No data to export" : "Download CSV"}
         >
           Export CSV
         </button>
+
         <button
-          onClick={() => alert('PDF export coming soon')}
-          className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors"
+          onClick={exportPDF}
+          disabled={!hasData}
+          className="bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded hover:bg-red-700 transition-colors"
+          title={!hasData ? "No data to export" : "Download PDF"}
         >
           Export PDF
         </button>
@@ -127,17 +340,16 @@ const AdminReport = () => {
               <th className="px-6 py-3 text-left font-medium text-gray-600">Not Paid</th>
             </tr>
           </thead>
+
           <tbody className="bg-white divide-y divide-gray-200">
             {report.length > 0 ? (
               report.map((item) => (
                 <tr key={item.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">{item.make || '—'}</td>
-                  <td className="px-6 py-4">{item.model || '—'}</td>
+                  <td className="px-6 py-4">{item.make || "—"}</td>
+                  <td className="px-6 py-4">{item.model || "—"}</td>
                   <td className="px-6 py-4">{formatCurrency(item.price)}</td>
                   <td className="px-6 py-4">{formatCurrency(item.paid_amount)}</td>
-                  <td className="px-6 py-4">
-                    {item.not_paid_amount === null ? '—' : formatCurrency(item.not_paid_amount)}
-                  </td>
+                  <td className="px-6 py-4">{formatCurrency(item.not_paid_amount)}</td>
                 </tr>
               ))
             ) : (
@@ -147,6 +359,7 @@ const AdminReport = () => {
                 </td>
               </tr>
             )}
+
             <tr className="font-bold bg-gray-50">
               <td className="px-6 py-4">TOTAL</td>
               <td></td>
@@ -157,6 +370,11 @@ const AdminReport = () => {
           </tbody>
         </table>
       </div>
+
+      {/* Optional tip */}
+      <p className="text-xs text-gray-500 mt-4">
+        PDF Export: If you don’t have jsPDF installed, the browser print dialog opens and you can “Save as PDF”.
+      </p>
     </div>
   );
 };

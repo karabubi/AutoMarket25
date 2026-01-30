@@ -21,7 +21,7 @@ const Contact = () => {
           <div>
             <h2 className="text-xl font-semibold">📍 Address</h2>
             <p className="text-gray-700">
-              Honnefer Str. 19,<br />53179 Bonn, Germany
+              Honnefer Str. ,<br />53179 Bonn, Germany
             </p>
           </div>
         </div>
