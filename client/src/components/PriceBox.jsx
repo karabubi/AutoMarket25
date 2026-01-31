@@ -1,73 +1,87 @@
 
 //Users/salehalkarabubi/works/27-05-2025 AutoMarket25/AutoMarket25/client/src/components/PriceBox.jsx
-import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   CheckCircleIcon,
   XCircleIcon,
   UserIcon,
   AtSymbolIcon,
   PaperAirplaneIcon,
-} from '@heroicons/react/24/outline';
+} from "@heroicons/react/24/outline";
+
+// ✅ IMPORTANT: use the shared API helper (works on localhost + Vercel)
+import { sendPurchaseRequest } from "../utils/api";
 
 const PriceBox = ({ price, carId, make, model }) => {
   const { t } = useTranslation();
-  const [userName, setUserName] = useState('');
-  const [userEmail, setUserEmail] = useState('');
-  const [userMessage, setUserMessage] = useState('');  // New state for the message
-  const [statusMessage, setStatusMessage] = useState('');
+
+  const [userName, setUserName] = useState("");
+  const [userEmail, setUserEmail] = useState("");
+  const [userMessage, setUserMessage] = useState("");
+  const [statusMessage, setStatusMessage] = useState("");
   const [isSuccess, setIsSuccess] = useState(null);
+  const [isSending, setIsSending] = useState(false);
 
   // Validate email format with regex
   const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-  // Handle email send request
   const handleSendEmail = async () => {
-    // Validate required fields (name, email, message)
+    // reset old status
+    setStatusMessage("");
+    setIsSuccess(null);
+
+    // Validate required fields
     if (!userName.trim() || !userEmail.trim() || !userMessage.trim()) {
-      setStatusMessage(t('priceBox.missingFields'));  // e.g. "Please fill in all fields."
+      setStatusMessage(t("priceBox.missingFields"));
       setIsSuccess(false);
       return;
     }
 
     // Validate email format
     if (!isValidEmail(userEmail)) {
-      setStatusMessage(t('priceBox.invalidEmail'));   // e.g. "Invalid email address."
+      setStatusMessage(t("priceBox.invalidEmail"));
       setIsSuccess(false);
       return;
     }
 
+    setIsSending(true);
+
     try {
-      const response = await fetch('http://localhost:5001/api/email/purchase-request', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userName,
-          userEmail,
-          message: userMessage,    // Include the user's message in the request body
-          carId,
-          make,
-          model,
-          price,
-        }),
+      // ✅ Send via API helper (baseURL handles dev/prod)
+      await sendPurchaseRequest({
+        userName: userName.trim(),
+        userEmail: userEmail.trim(),
+        message: userMessage.trim(),
+        carId,
+        make,
+        model,
+        price,
       });
 
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to send');
-      }
-
-      // If successful:
-      setStatusMessage(t('priceBox.success'));   // e.g. "Message sent successfully!"
+      // success
+      setStatusMessage(t("priceBox.success"));
       setIsSuccess(true);
-      // Optionally, clear the form fields upon success:
-      setUserName('');
-      setUserEmail('');
-      setUserMessage('');
-    } catch (error) {
-      console.error('Email send error:', error);
-      setStatusMessage(t('priceBox.error'));     // e.g. "Failed to send message. Please try again."
+
+      // clear fields
+      setUserName("");
+      setUserEmail("");
+      setUserMessage("");
+    } catch (err) {
+      // ✅ Better error message extraction
+      const serverMsg =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err?.message ||
+        null;
+
+      console.error("Email send error:", err?.response?.data || err);
+
+      setStatusMessage(serverMsg || t("priceBox.error"));
       setIsSuccess(false);
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -78,7 +92,7 @@ const PriceBox = ({ price, carId, make, model }) => {
         €{price?.toLocaleString()}
       </h3>
       <p className="text-sm text-gray-600 dark:text-gray-300">
-        {t('priceBox.negotiable')}
+        {t("priceBox.negotiable")}
       </p>
 
       {/* Name Input */}
@@ -87,7 +101,7 @@ const PriceBox = ({ price, carId, make, model }) => {
           type="text"
           value={userName}
           onChange={(e) => setUserName(e.target.value)}
-          placeholder={t('priceBox.namePlaceholder')}    /* e.g. "Your Name" */
+          placeholder={t("priceBox.namePlaceholder")}
           className="w-full pl-11 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 
                      bg-white dark:bg-gray-800 text-gray-900 dark:text-white 
                      placeholder-gray-500 dark:placeholder-gray-400 
@@ -102,7 +116,7 @@ const PriceBox = ({ price, carId, make, model }) => {
           type="email"
           value={userEmail}
           onChange={(e) => setUserEmail(e.target.value)}
-          placeholder={t('priceBox.emailPlaceholder')}   /* e.g. "Your Email" */
+          placeholder={t("priceBox.emailPlaceholder")}
           className="w-full pl-11 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 
                      bg-white dark:bg-gray-800 text-gray-900 dark:text-white 
                      placeholder-gray-500 dark:placeholder-gray-400 
@@ -116,26 +130,26 @@ const PriceBox = ({ price, carId, make, model }) => {
         <textarea
           value={userMessage}
           onChange={(e) => setUserMessage(e.target.value)}
-          placeholder={t('priceBox.messagePlaceholder')}  /* e.g. "Your Message" */
+          placeholder={t("priceBox.messagePlaceholder")}
           rows={4}
           className="w-full min-h-[4rem] max-h-32 pl-11 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 
                      bg-white dark:bg-gray-800 text-gray-900 dark:text-white 
                      placeholder-gray-500 dark:placeholder-gray-400 
                      focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
         />
-        {/* An icon for message (optional, e.g., a chat icon) could be placed similar to UserIcon if desired */}
-        {/* <ChatBubbleLeftIcon className="h-5 w-5 absolute left-3 top-2.5 text-gray-400 dark:text-gray-500" /> */}
       </div>
 
       {/* Send Email Button */}
       <button
         onClick={handleSendEmail}
+        disabled={isSending}
         className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 
+                   disabled:opacity-60 disabled:cursor-not-allowed
                    text-white font-semibold py-2 px-4 rounded-lg transition 
                    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
       >
         <PaperAirplaneIcon className="h-5 w-5" />
-        <span>{t('priceBox.sendEmail')}</span>
+        <span>{isSending ? t("priceBox.sending") || "Sending..." : t("priceBox.sendEmail")}</span>
       </button>
 
       {/* Status Feedback */}
@@ -143,8 +157,8 @@ const PriceBox = ({ price, carId, make, model }) => {
         <div
           className={`flex items-center gap-2 text-sm font-medium p-3 rounded-lg border transition ${
             isSuccess
-              ? 'bg-green-100 text-green-800 border-green-300 dark:bg-green-800 dark:text-green-100 dark:border-green-600'
-              : 'bg-red-100 text-red-800 border-red-300 dark:bg-red-800 dark:text-red-100 dark:border-red-600'
+              ? "bg-green-100 text-green-800 border-green-300 dark:bg-green-800 dark:text-green-100 dark:border-green-600"
+              : "bg-red-100 text-red-800 border-red-300 dark:bg-red-800 dark:text-red-100 dark:border-red-600"
           }`}
         >
           {isSuccess ? (
@@ -160,4 +174,3 @@ const PriceBox = ({ price, carId, make, model }) => {
 };
 
 export default PriceBox;
-

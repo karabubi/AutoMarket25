@@ -80,13 +80,17 @@
   },
   "priceBox": {
   "negotiable": "Negotiable",
-  "namePlaceholder": "Your name",
-  "emailPlaceholder": "Your email",
+  "namePlaceholder": "Your Name",
+  "emailPlaceholder": "Your Email",
+  "messagePlaceholder": "Your Message",
   "sendEmail": "Send Email",
-  "missingFields": "❌ Please enter your name and email.",
+  "sending": "Sending...",
+  "missingFields": "Please fill in all fields.",
+  "invalidEmail": "Invalid email address.",
   "success": "✅ Email sent successfully.",
   "error": "❌ Failed to send email."
 }
+
 
 
 
