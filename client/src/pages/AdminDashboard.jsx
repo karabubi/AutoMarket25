@@ -1,4 +1,4 @@
-//Users/salehalkarabubi/works/27-05-2025 AutoMarket25/AutoMarket25/client/src/pages/AdminDashboard.jsx
+// /client/src/pages/AdminDashboard.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -41,11 +41,15 @@ const AdminDashboard = () => {
   const [savingId, setSavingId] = useState(null);
   const [savedId, setSavedId] = useState(null);
 
+  // ✅ safer currency formatting
   const formatCurrency = (num) =>
     new Intl.NumberFormat("de-DE", {
       style: "currency",
       currency: "EUR",
     }).format(Number(num || 0));
+
+  // Helper: normalize comma decimals
+  const normalize = (str = "") => String(str).replace(",", ".");
 
   const showSuccess = () => {
     toast.success("Saved successfully!", {
@@ -54,8 +58,11 @@ const AdminDashboard = () => {
     });
   };
 
-  // Helper: normalize comma decimals
-  const normalize = (str = "") => String(str).replace(",", ".");
+  // ✅ reuse auth headers everywhere (clean + avoids mistakes)
+  const authHeaders = useMemo(() => {
+    if (!token) return {};
+    return { headers: { Authorization: `Bearer ${token}` } };
+  }, [token]);
 
   const isRowValid = (car) => {
     const paid = parseFloat(normalize(car.paid_amount));
@@ -92,21 +99,21 @@ const AdminDashboard = () => {
 
       try {
         // ✅ IMPORTANT FIX:
-        // Use API (baseURL already includes /api in prod)
-        // So DO NOT write /api/admin/cars here.
-        const res = await API.get("/admin/cars", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        // API already has baseURL ".../api" in prod,
+        // so use "/admin/..." NOT "/api/admin/..."
+        const res = await API.get("/admin/cars", authHeaders);
 
+        // ✅ safer: ensure list is array
         const list = Array.isArray(res.data) ? res.data : [];
 
         // Enrich each car with payment info
         const enriched = await Promise.all(
           list.map(async (car) => {
             try {
-              const p = await API.get(`/admin/cars/${car.id}/payments`, {
-                headers: { Authorization: `Bearer ${token}` },
-              });
+              const p = await API.get(
+                `/admin/cars/${car.id}/payments`,
+                authHeaders
+              );
 
               const payment = Array.isArray(p.data) ? p.data[0] : p.data;
 
@@ -119,7 +126,7 @@ const AdminDashboard = () => {
                   "0",
                 payment_id: payment?.id || null,
               };
-            } catch (e) {
+            } catch {
               // If payment doesn't exist, default values
               return {
                 ...car,
@@ -133,8 +140,12 @@ const AdminDashboard = () => {
 
         setCars(enriched);
       } catch (err) {
-        console.error("❌ AdminDashboard fetchCars error:", err?.response?.data || err);
+        console.error(
+          "❌ AdminDashboard fetchCars error:",
+          err?.response?.data || err
+        );
 
+        // ✅ show real backend error message (best for debugging)
         const msg =
           err?.response?.data?.message ||
           err?.response?.data?.error ||
@@ -148,7 +159,7 @@ const AdminDashboard = () => {
     };
 
     fetchCars();
-  }, [token]);
+  }, [token, authHeaders]);
 
   const handleSave = async (car) => {
     setError("");
@@ -172,12 +183,12 @@ const AdminDashboard = () => {
 
     try {
       const resp = car.payment_id
-        ? await API.put(`/admin/payments/${car.payment_id}`, payload, {
-            headers: { Authorization: `Bearer ${token}` },
-          })
-        : await API.post(`/admin/cars/${car.id}/payments`, payload, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
+        ? await API.put(`/admin/payments/${car.payment_id}`, payload, authHeaders)
+        : await API.post(
+            `/admin/cars/${car.id}/payments`,
+            payload,
+            authHeaders
+          );
 
       showSuccess();
       setSavedId(car.id);
@@ -192,7 +203,10 @@ const AdminDashboard = () => {
         );
       }
     } catch (err) {
-      console.error("❌ AdminDashboard handleSave error:", err?.response?.data || err);
+      console.error(
+        "❌ AdminDashboard handleSave error:",
+        err?.response?.data || err
+      );
 
       const msg =
         err?.response?.data?.message ||
@@ -205,6 +219,7 @@ const AdminDashboard = () => {
     }
   };
 
+  // ✅ memoized totals (better performance)
   const totals = useMemo(() => {
     return cars.reduce(
       (acc, c) => {
@@ -243,6 +258,7 @@ const AdminDashboard = () => {
     doc.save("car_report.pdf");
   };
 
+  // ✅ memoized chart data (better performance + avoids re-render issues)
   const barData = useMemo(() => {
     return {
       labels: cars.map((c) => `${c.make} ${c.model}`),
