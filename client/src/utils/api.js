@@ -105,7 +105,7 @@ if (!isDev && !import.meta.env.VITE_API_URL) {
 
 const API = axios.create({
   baseURL: API_BASE,
-  timeout: 70000,
+  timeout: 30000,
 });
 
 /** Optional helper */

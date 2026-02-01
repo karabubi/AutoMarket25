@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://automarket25-api.onrender.com/api/$1"
+      "destination": "https://automarket25.onrender.com/api/$1"
     },
     {
       "source": "/(.*)",
