@@ -179,7 +179,7 @@ import axios from "axios";
  */
 const API = axios.create({
   baseURL: "/api",
-  timeout: 60000, // Render can be slow on cold start
+  timeout: 120000, // Render can be slow on cold start
 });
 
 /** Optional helper */
