@@ -83,7 +83,7 @@ app.use(
 /**
  * ✅ Health check endpoint
  */
-app.get("/health", async (req, res) => {
+const healthHandler = async (req, res) => {
   try {
     const result = await db.query("SELECT NOW() as now");
     res.status(200).json({
@@ -94,7 +94,10 @@ app.get("/health", async (req, res) => {
   } catch (err) {
     res.status(500).json({ ok: false, error: err.message });
   }
-});
+};
+
+app.get("/health", healthHandler);
+app.get("/api/health", healthHandler); // ✅ added (fixes your curl /api/health)
 
 /**
  * ✅ Root route
